@@ -1,4 +1,4 @@
-package lspci
+package golspci
 
 import (
 	"encoding/json"
