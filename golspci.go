@@ -3,7 +3,6 @@ package golspci
 import (
 	"bufio"
 	"bytes"
-	"fmt"
 	"io"
 	"log"
 	"os/exec"
@@ -17,15 +16,15 @@ type LSPCI struct {
 }
 
 type pciDevice struct {
-	slot     string
-	class    string
-	vendor   string
-	device   string
-	sVendor  string
-	sDevice  string
-	rev      int
-	progIf   int
-	numaNode int
+	Slot     string
+	Class    string
+	Vendor   string
+	Name     string
+	SVendor  string
+	SDevice  string
+	Rev      int
+	ProgIf   int
+	NumaNode int
 }
 
 func New(vendorInNumber bool) *LSPCI {
@@ -43,42 +42,40 @@ func (l *LSPCI) Parse() error {
 		log.Fatalf("Failed to get devices, because of the following error: %v", err)
 	}
 	i := 0
+	pciDevice := pciDevice{}
 	for _, device := range devices {
-		pciDevice := pciDevice{}
 		for k, v := range device {
 			switch k {
 			case "Slot":
-				pciDevice.slot = v
+				pciDevice.Slot = v
 			case "Class":
-				pciDevice.class = v
+				pciDevice.Class = v
 			case "Vendor":
-				pciDevice.vendor = v
+				pciDevice.Vendor = v
 			case "Device":
-				pciDevice.device = v
+				pciDevice.Name = v
 			case "SVendor":
-				pciDevice.sVendor = v
+				pciDevice.SVendor = v
 			case "SDevice":
-				pciDevice.sDevice = v
+				pciDevice.SDevice = v
 			case "Rev":
 				rev, err := strconv.Atoi(v)
 				if err != nil {
 					log.Fatalf("Failed to convert value: %v to int. Got error: %v", v, err)
 				}
-				pciDevice.rev = rev
+				pciDevice.Rev = rev
 			case "ProgIf":
 				progIf, err := strconv.Atoi(v)
 				if err != nil {
 					log.Fatalf("Failed to convert value: %v to int. Got error: %v", v, err)
 				}
-				pciDevice.progIf = progIf
+				pciDevice.ProgIf = progIf
 			case "NUMANode":
-				fmt.Println(k)
-				fmt.Println(v)
 				numaNode, err := strconv.Atoi(v)
 				if err != nil {
 					log.Fatalf("Failed to convert value: %v to int. Got error: %v", v, err)
 				}
-				pciDevice.numaNode = numaNode
+				pciDevice.NumaNode = numaNode
 			}
 		}
 		l.Devices = append(l.Devices, pciDevice)
