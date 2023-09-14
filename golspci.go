@@ -3,6 +3,7 @@ package golspci
 import (
 	"bufio"
 	"bytes"
+	"fmt"
 	"io"
 	"log"
 	"os/exec"
@@ -11,11 +12,11 @@ import (
 )
 
 type LSPCI struct {
-	Devices    []device
+	Devices    []pciDevice
 	flagNumber bool
 }
 
-type device struct {
+type pciDevice struct {
 	slot     string
 	class    string
 	vendor   string
@@ -29,53 +30,59 @@ type device struct {
 
 func New(vendorInNumber bool) *LSPCI {
 	return &LSPCI{
-		Devices:    []device{},
+		Devices:    []pciDevice{},
 		flagNumber: vendorInNumber,
 	}
 }
 
+// func (l *LSPCI) SetDevice(i int)
+
 func (l *LSPCI) Parse() error {
-	deviceMap, err := getDevices(l.flagNumber)
+	devices, err := getDevices(l.flagNumber)
 	if err != nil {
 		log.Fatalf("Failed to get devices, because of the following error: %v", err)
 	}
 	i := 0
-	for _, devices := range deviceMap {
-		for k, v := range devices {
+	for _, device := range devices {
+		pciDevice := pciDevice{}
+		for k, v := range device {
 			switch k {
 			case "Slot":
-				l.Devices[i].slot = v
+				pciDevice.slot = v
 			case "Class":
-				l.Devices[i].class = v
+				pciDevice.class = v
 			case "Vendor":
-				l.Devices[i].vendor = v
+				pciDevice.vendor = v
 			case "Device":
-				l.Devices[i].device = v
+				pciDevice.device = v
 			case "SVendor":
-				l.Devices[i].sVendor = v
+				pciDevice.sVendor = v
 			case "SDevice":
-				l.Devices[i].sDevice = v
+				pciDevice.sDevice = v
 			case "Rev":
 				rev, err := strconv.Atoi(v)
 				if err != nil {
 					log.Fatalf("Failed to convert value: %v to int. Got error: %v", v, err)
 				}
-				l.Devices[i].rev = rev
+				pciDevice.rev = rev
 			case "ProgIf":
 				progIf, err := strconv.Atoi(v)
 				if err != nil {
 					log.Fatalf("Failed to convert value: %v to int. Got error: %v", v, err)
 				}
-				l.Devices[i].progIf = progIf
+				pciDevice.progIf = progIf
 			case "NUMANode":
+				fmt.Println(k)
+				fmt.Println(v)
 				numaNode, err := strconv.Atoi(v)
 				if err != nil {
 					log.Fatalf("Failed to convert value: %v to int. Got error: %v", v, err)
 				}
-				l.Devices[i].numaNode = numaNode
+				pciDevice.numaNode = numaNode
 			}
-			i++
 		}
+		l.Devices = append(l.Devices, pciDevice)
+		i++
 	}
 	return err
 }
