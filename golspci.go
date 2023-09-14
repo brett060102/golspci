@@ -3,30 +3,91 @@ package golspci
 import (
 	"bufio"
 	"bytes"
+	"fmt"
 	"io"
+	"log"
 	"os/exec"
+	"strconv"
 	"strings"
 )
 
 type LSPCI struct {
-	Data       map[string]map[string]string
+	Devices    []device
 	flagNumber bool
+}
+
+type device struct {
+	slot     string
+	class    string
+	vendor   string
+	device   string
+	sVendor  string
+	sDevice  string
+	rev      int
+	progIf   int
+	numaNode int
 }
 
 func New(vendorInNumber bool) *LSPCI {
 	return &LSPCI{
-		Data:       make(map[string]map[string]string),
+		Devices:    []device{},
 		flagNumber: vendorInNumber,
 	}
 }
 
-func (l *LSPCI) Run() error {
+func (l *LSPCI) Parse() error {
+	deviceMap, err := getDevices(l.flagNumber)
+	if err != nil {
+		log.Fatalf("Failed to get devices, because of the following error: %v", err)
+	}
+	i := 0
+	for _, devices := range deviceMap {
+		for k, v := range devices {
+			switch k {
+			case "Slot":
+				l.Devices[i].slot = v
+			case "Class":
+				l.Devices[i].class = v
+			case "Vendor":
+				l.Devices[i].vendor = v
+			case "Device":
+				l.Devices[i].device = v
+			case "SVendor":
+				l.Devices[i].sVendor = v
+			case "SDevice":
+				l.Devices[i].sDevice = v
+			case "Rev":
+				rev, err := strconv.Atoi(v)
+				if err != nil {
+					log.Fatalf("Failed to convert value: %v to int. Got error: %v", v, err)
+				}
+				l.Devices[i].rev = rev
+			case "ProgIf":
+				progIf, err := strconv.Atoi(v)
+				if err != nil {
+					log.Fatalf("Failed to convert value: %v to int. Got error: %v", v, err)
+				}
+				l.Devices[i].progIf = progIf
+			case "NUMANode":
+				numaNode, err := strconv.Atoi(v)
+				if err != nil {
+					log.Fatalf("Failed to convert value: %v to int. Got error: %v", v, err)
+				}
+				l.Devices[i].numaNode = numaNode
+			}
+			i++
+		}
+	}
+	return err
+}
+
+func getDevices(vendorInNumber bool) (map[string]map[string]string, error) {
 	bin, findErr := findBin("lspci")
 	if findErr != nil {
-		return findErr
+		return nil, findErr
 	}
 	args := []string{"-vmm", "-D"}
-	if l.flagNumber {
+	if vendorInNumber {
 		args = append(args, "-n")
 	}
 	cmd := exec.Command(bin, args...)
@@ -35,15 +96,13 @@ func (l *LSPCI) Run() error {
 	cmd.Stdout = out
 	err := cmd.Run()
 	if err != nil {
-		return err
+		return nil, err
 	}
-	l.Data, err = parseLSPCI(out)
-	return err
+	return parseLSPCI(out)
 }
 
-var sep = []byte{'\n', '\n'}
-
 func scanDoubleNewLine(data []byte, atEOF bool) (advance int, token []byte, err error) {
+	sep := []byte{'\n', '\n'}
 	if atEOF && len(data) == 0 {
 		return 0, nil, nil
 	}
