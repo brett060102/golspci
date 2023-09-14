@@ -34,8 +34,6 @@ func New(vendorInNumber bool) *LSPCI {
 	}
 }
 
-// func (l *LSPCI) SetDevice(i int)
-
 func (l *LSPCI) Parse() error {
 	devices, err := getDevices(l.flagNumber)
 	if err != nil {
