@@ -2,7 +2,6 @@ package lspci
 
 import (
 	"encoding/json"
-	"io/ioutil"
 	"os"
 	"reflect"
 	"testing"
@@ -14,7 +13,7 @@ func TestParse(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer f.Close()
-	std, err := ioutil.ReadFile("testcase/output-std.json")
+	std, err := os.ReadFile("testcase/output-std.json")
 	if err != nil {
 		t.Fatal(err)
 	}
