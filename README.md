@@ -20,27 +20,21 @@ import (
 func main() {
     // vendorInNumber=false to get text version of vendor
     // vendorInNumber=true to get codes version of vendor
-    l := lspci.New(false)
+    l := golspci.New(false)
 
-    if err := l.Run(); err != nil {
+    if err := l.Parse(); err != nil {
         panic(err)
     }
 
-    fmt.Println(l.Data)
+	for _, device := range l.Devices {
+		fmt.Println(device.Name)
+	}
     // You will get something like:
-    /* map[
-        0000:7f:14.1:
-            map[
-                SVendor:Intel Corporation
-                SDevice:Xeon E7 v3/Xeon E5 v3/Core i7 Integrated Memory Controller 0 Channel 1 Thermal Control
-                Rev:02
-                Slot:0000:7f:14.1
-                Class:System peripheral
-                Vendor:Intel Corporation
-                Device:Xeon E7 v3/Xeon E5 v3/Core i7 Integrated Memory Controller 0 Channel 1 Thermal Control
-            ]
-        0000:ff:14.0:
-            map[
+    /*
+        Tiger Lake-LP Serial IO I2C Controller #0
+        Tiger Lake-LP LPC Controller
+        Tiger Lake-LP Smart Sound Technology Audio Controller
+        Tiger Lake-LP Thunderbolt 4 NHI #0
         ...
      */
 }
