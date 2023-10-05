@@ -10,7 +10,7 @@ import (
 	"strings"
 )
 
-type LSPCI struct {
+type lspci struct {
 	Devices    []pciDevice
 	flagNumber bool
 }
@@ -27,14 +27,14 @@ type pciDevice struct {
 	NumaNode int
 }
 
-func New(vendorInNumber bool) *LSPCI {
-	return &LSPCI{
+func New(vendorInNumber bool) *lspci {
+	return &lspci{
 		Devices:    []pciDevice{},
 		flagNumber: vendorInNumber,
 	}
 }
 
-func (l *LSPCI) Parse() error {
+func (l *lspci) Parse() error {
 	devices, err := getDevices(l.flagNumber)
 	if err != nil {
 		log.Fatalf("Failed to get devices, because of the following error: %v", err)
