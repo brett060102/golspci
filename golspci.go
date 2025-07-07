@@ -57,23 +57,23 @@ func (l *lspci) Parse() error {
 			case "SDevice":
 				pciDevice.SDevice = v
 			case "Rev":
-				rev, err := strconv.Atoi(v)
+				rev, err := strconv.ParseInt(v, 16, 32)
 				if err != nil {
 					log.Fatalf("Failed to convert value: %v to int. Got error: %v", v, err)
 				}
-				pciDevice.Rev = rev
+				pciDevice.Rev = int(rev)
 			case "ProgIf":
-				progIf, err := strconv.Atoi(v)
+				progIf, err := strconv.ParseInt(v, 16, 32)
 				if err != nil {
 					log.Fatalf("Failed to convert value: %v to int. Got error: %v", v, err)
 				}
-				pciDevice.ProgIf = progIf
+				pciDevice.ProgIf = int(progIf)
 			case "NUMANode":
-				numaNode, err := strconv.Atoi(v)
+				numaNode, err := strconv.ParseInt(v, 16, 32)
 				if err != nil {
 					log.Fatalf("Failed to convert value: %v to int. Got error: %v", v, err)
 				}
-				pciDevice.NumaNode = numaNode
+				pciDevice.NumaNode = int(numaNode)
 			}
 		}
 		l.Devices = append(l.Devices, pciDevice)
