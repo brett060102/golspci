@@ -22,9 +22,9 @@ type pciDevice struct {
 	Name     string
 	SVendor  string
 	SDevice  string
-	Rev      int
-	ProgIf   int
-	NumaNode int
+	Rev      string
+	ProgIf   string
+	NumaNode string
 }
 
 func New(vendorInNumber bool) *lspci {
@@ -61,19 +61,19 @@ func (l *lspci) Parse() error {
 				if err != nil {
 					log.Fatalf("Failed to convert value: %v to int. Got error: %v", v, err)
 				}
-				pciDevice.Rev = int(rev)
+				pciDevice.Rev = v
 			case "ProgIf":
 				progIf, err := strconv.ParseInt(v, 16, 32)
 				if err != nil {
 					log.Fatalf("Failed to convert value: %v to int. Got error: %v", v, err)
 				}
-				pciDevice.ProgIf = int(progIf)
+				pciDevice.ProgIf = v
 			case "NUMANode":
 				numaNode, err := strconv.ParseInt(v, 16, 32)
 				if err != nil {
 					log.Fatalf("Failed to convert value: %v to int. Got error: %v", v, err)
 				}
-				pciDevice.NumaNode = int(numaNode)
+				pciDevice.NumaNode = v
 			}
 		}
 		l.Devices = append(l.Devices, pciDevice)
